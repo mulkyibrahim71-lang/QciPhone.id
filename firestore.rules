@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety net catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Fully isolated user shop settings
+    match /users/{userId}/settings/shop {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Fully isolated user transactions
+    match /users/{userId}/transactions/{transactionId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

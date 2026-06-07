@@ -1,0 +1,1027 @@
+import { QCPart } from "./types";
+
+export const DEFAULT_PARTS: QCPart[] = [
+  {
+    name: "Layar",
+    conditions: [
+      { label: "NORMAL / MULUS", cost: 0 },
+      { label: "TERDAPAT GARIS", cost: 400000 },
+      { label: "SHADOW / BAYANGAN", cost: 400000 },
+      { label: "BURN IN / GHOST IMAGE", cost: 500000 },
+      { label: "DEAD PIXEL / TITIK HITAM", cost: 450000 },
+      { label: "KUNING / COLOR SHIFT", cost: 300000 },
+      { label: "RETAK (KACA SAJA)", cost: 300000 },
+      { label: "PECAH / LCD RUSAK", cost: 600000 }
+    ]
+  },
+  {
+    name: "Kamera Belakang",
+    conditions: [
+      { label: "JERNIH / NORMAL", cost: 0 },
+      { label: "BURAM / TIDAK FOKUS", cost: 300000 },
+      { label: "GOYANG / GETER (OIS)", cost: 400000 },
+      { label: "BLANK HITAM", cost: 450000 },
+      { label: "ADA JAMUR / BEREMBUN", cost: 350000 },
+      { label: "TITIK HITAM DI FOTO", cost: 300000 },
+      { label: "FLASH MATI", cost: 200000 }
+    ]
+  },
+  {
+    name: "Kamera Depan",
+    conditions: [
+      { label: "JERNIH / NORMAL", cost: 0 },
+      { label: "BURAM / TIDAK FOKUS", cost: 200000 },
+      { label: "BLANK HITAM", cost: 300000 },
+      { label: "FACE ID TIDAK BERFUNGSI", cost: 500000 },
+      { label: "KAMERA MATI TOTAL", cost: 350000 }
+    ]
+  },
+  {
+    name: "Baterai",
+    hasHealth: true,
+    conditions: [
+      { label: "HEALTH 90–100% (PRIMA)", cost: 0 },
+      { label: "HEALTH 80–89% (NORMAL)", cost: 0 },
+      { label: "HEALTH 70–79% (MULAI AUS)", cost: 150000 },
+      { label: "HEALTH < 70% (HARUS GANTI)", cost: 250000 },
+      { label: "KEMBUNG / BENGKOK", cost: 300000 },
+      { label: "SERVICE (BUKAN ORIGINAL)", cost: 200000 }
+    ]
+  },
+  {
+    name: "Speaker",
+    conditions: [
+      { label: "NORMAL / JERNIH", cost: 0 },
+      { label: "NGEBASS / CEMPRENG", cost: 150000 },
+      { label: "VOLUME KECIL ABNORMAL", cost: 150000 },
+      { label: "PECAH / DISTORSI SUARA", cost: 200000 },
+      { label: "MATI TOTAL", cost: 300000 }
+    ]
+  },
+  {
+    name: "Mikrofon",
+    conditions: [
+      { label: "NORMAL", cost: 0 },
+      { label: "SUARA KECIL / TIDAK JELAS", cost: 150000 },
+      { label: "NOISE / BERISIK", cost: 150000 },
+      { label: "MATI (TIDAK TEREKAM)", cost: 200000 }
+    ]
+  },
+  {
+    name: "Sinyal / Jaringan",
+    conditions: [
+      { label: "NORMAL SEMUA OPERATOR", cost: 0 },
+      { label: "SINYAL LEMAH", cost: 0, infoText: "monitoring" },
+      { label: "NO SIGNAL / SEARCHING", cost: 400000 },
+      { label: "WIFI ONLY (BASEBAND MATI)", cost: 400000 },
+      { label: "HP TERBLOKIR / BLACKLIST", cost: 200000, infoText: "perlu proses unblock" }
+    ]
+  },
+  {
+    name: "iCloud / Akun Apple ID",
+    isInfoPart: true,
+    conditions: [
+      { label: "AMAN / iCLOUD OFF", cost: 0, isInfo: true },
+      { label: "iCLOUD LOCK / ACTIVATION LOCK", cost: 0, isInfo: true, infoText: "TOLAK / SANGAT MURAH" },
+      { label: "MASIH LOGIN (BELUM LOGOUT)", cost: 0, isInfo: true, infoText: "MINTA LOGOUT DULU" }
+    ]
+  },
+  {
+    name: "Tombol Home / Touch ID",
+    conditions: [
+      { label: "NORMAL & TOUCH ID BERFUNGSI", cost: 0 },
+      { label: "TOMBOL BERFUNGSI, TOUCH ID MATI", cost: 200000 },
+      { label: "TOMBOL TIDAK RESPONSIF", cost: 200000 },
+      { label: "PENGGANTI / NON-ORIGINAL", cost: 0, infoText: "Touch ID mati" },
+      { label: "N/A (MODEL TANPA HOME BUTTON)", cost: 0 }
+    ]
+  },
+  {
+    name: "Face ID",
+    conditions: [
+      { label: "NORMAL / BERFUNGSI", cost: 0 },
+      { label: "LAMBAT / TIDAK KONSISTEN", cost: 200000 },
+      { label: "MATI TOTAL", cost: 500000 },
+      { label: "N/A (MODEL TANPA FACE ID)", cost: 0 }
+    ]
+  },
+  {
+    name: "Tombol Volume (+ / -)",
+    conditions: [
+      { label: "NORMAL", cost: 0 },
+      { label: "MACET / KERAS DITEKAN", cost: 100000 },
+      { label: "SALAH SATU TIDAK BERFUNGSI", cost: 150000 },
+      { label: "KEDUANYA TIDAK BERFUNGSI", cost: 200000 }
+    ]
+  },
+  {
+    name: "Tombol Power / Side Button",
+    conditions: [
+      { label: "NORMAL", cost: 0 },
+      { label: "MACET / KERAS DITEKAN", cost: 100000 },
+      { label: "TIDAK BERFUNGSI", cost: 200000 }
+    ]
+  },
+  {
+    name: "Silent Switch",
+    conditions: [
+      { label: "NORMAL", cost: 0 },
+      { label: "LONGGAR / GOYANG", cost: 100000 },
+      { label: "MACET (TIDAK BISA PINDAH)", cost: 100000 },
+      { label: "TIDAK BERFUNGSI", cost: 150000 }
+    ]
+  },
+  {
+    name: "Port Charging",
+    conditions: [
+      { label: "NORMAL", cost: 0 },
+      { label: "LONGGAR / GOYANG", cost: 150000 },
+      { label: "PENGISIAN LAMBAT / PUTUS-PUTUS", cost: 200000 },
+      { label: "TIDAK BISA MENGISI SAMA SEKALI", cost: 250000 },
+      { label: "KOTOR / BERDEBU (BISA BERSIHKAN)", cost: 0 }
+    ]
+  },
+  {
+    name: "Body / Casing Luar",
+    conditions: [
+      { label: "MULUS / TIDAK ADA CACAT", cost: 0 },
+      { label: "BARET HALUS (WAJAR)", cost: 0 },
+      { label: "BARET DALAM / LECET JELAS", cost: 0, infoText: "minus harga" },
+      { label: "PENYOK / BENGKOK", cost: 200000 },
+      { label: "RETAK / PECAH", cost: 350000 }
+    ]
+  },
+  {
+    name: "Vibrator / Haptic Engine",
+    conditions: [
+      { label: "NORMAL / BERGETAR", cost: 0 },
+      { label: "LEMAH / TIDAK TERASA", cost: 150000 },
+      { label: "BUNYI BERISIK SAAT GETAR", cost: 150000 },
+      { label: "MATI TOTAL", cost: 200000 }
+    ]
+  }
+];
+
+export const STORAGE_KEY_PARTS = "iphone_elite_qc_parts_v2_16parts";
+export const STORAGE_KEY_TRANSACTIONS = "qc_transactions";
+
+
+export const IPHONE_MODELS = [
+  "iPhone 17 Pro Max",
+  "iPhone 17 Pro",
+  "iPhone 17 Plus",
+  "iPhone 17",
+  "iPhone 16 Pro Max",
+  "iPhone 16 Pro",
+  "iPhone 16 Plus",
+  "iPhone 16",
+  "iPhone 15 Pro Max",
+  "iPhone 15 Pro",
+  "iPhone 15 Plus",
+  "iPhone 15",
+  "iPhone 14 Pro Max",
+  "iPhone 14 Pro",
+  "iPhone 14 Plus",
+  "iPhone 14",
+  "iPhone 13 Pro Max",
+  "iPhone 13 Pro",
+  "iPhone 13",
+  "iPhone 13 Mini",
+  "iPhone 12 Pro Max",
+  "iPhone 12 Pro",
+  "iPhone 12",
+  "iPhone 12 Mini",
+  "iPhone 11 Pro Max",
+  "iPhone 11 Pro",
+  "iPhone 11",
+  "iPhone XS Max",
+  "iPhone XS",
+  "iPhone XR",
+  "iPhone X",
+  "iPhone 8 Plus",
+  "iPhone 8",
+  "iPhone 7 Plus",
+  "iPhone 7",
+  "iPhone SE (3rd Gen)",
+  "iPhone SE (2nd Gen)"
+];
+
+export const IPHONE_STORAGES = [
+  "64GB",
+  "128GB",
+  "256GB",
+  "512GB",
+  "1TB"
+];
+
+export const SAMPLE_TRANSACTIONS = [
+  {
+    id: "TRX-QC-9842",
+    date: "2023-11-24",
+    customerName: "Budi Santoso",
+    customerWa: "081234567890",
+    deviceModel: "iPhone 15 Pro Max",
+    deviceStorage: "512GB",
+    deviceColor: "Natural Titanium",
+    buyPrice: 15500000,
+    sellPrice: 19999000,
+    totalRepairCost: 0,
+    netProfit: 4499000,
+    eligibility: "LAYAK BELI" as const,
+    notes: "Body mulus, iCloud aman, baterai health 100%. Kemungkinan untung tinggi.",
+    partsState: {}
+  },
+  {
+    id: "TRX-QC-9841",
+    date: "2023-11-23",
+    customerName: "Siti Rahayu",
+    customerWa: "082345678901",
+    deviceModel: "iPhone 14 Pro",
+    deviceStorage: "256GB",
+    deviceColor: "Space Black",
+    buyPrice: 12000000,
+    sellPrice: 14500000,
+    totalRepairCost: 0,
+    netProfit: 2500000,
+    eligibility: "LAYAK BELI" as const,
+    notes: "Layar mulus, faceID lancar, body mulus.",
+    partsState: {}
+  },
+  {
+    id: "TRX-QC-9840",
+    date: "2023-11-23",
+    customerName: "Ahmad Fauzi",
+    customerWa: "083456789012",
+    deviceModel: "iPhone 13 Mini",
+    deviceStorage: "128GB",
+    deviceColor: "Starlight",
+    buyPrice: 7000000,
+    sellPrice: 6500000,
+    totalRepairCost: 0, // In original screenshot, fail had totalRepairCost causing negative profit
+    netProfit: -500000,
+    eligibility: "BERESIKO TINGGI" as const,
+    notes: "Layar retak major fault, housing penyok, baterai drop, kempis. Beresiko merugi.",
+    partsState: {}
+  }
+];
+
+export interface SparepartDetail {
+  lcd: number | null;
+  baterai: number | null;
+  kamera_belakang: number | null;
+  kamera_depan: number | null;
+  kaca_kamera: number | null;
+  jamur_kamera: number | null;
+  speaker_bawah: number | null;
+  speaker_atas: number | null;
+  backglass: number | null;
+  housing: number | null;
+  flexible_charger: number | null;
+  flexible_onoff: number | null;
+  flexible_volume: number | null;
+  flexible_vibrate: number | null;
+  flexible_nfc: number | null;
+  home_button: number | null;
+  face_id: number | null;
+  Layar: number;
+  Baterai: number;
+  Body: number;
+}
+
+const RAW_SPAREPART_DATA: Record<string, Omit<SparepartDetail, "Layar" | "Baterai" | "Body">> = {
+  "iPhone 7": {
+    lcd: 380000,
+    baterai: 140000,
+    kamera_belakang: 300000,
+    kamera_depan: 165000,
+    kaca_kamera: 40000,
+    jamur_kamera: 150000,
+    speaker_bawah: 120000,
+    speaker_atas: 170000,
+    backglass: null,
+    housing: 250000,
+    flexible_charger: 150000,
+    flexible_onoff: 120000,
+    flexible_volume: 130000,
+    flexible_vibrate: 130000,
+    flexible_nfc: 100000,
+    home_button: 100000,
+    face_id: null
+  },
+  "iPhone 7 Plus": {
+    lcd: 400000,
+    baterai: 150000,
+    kamera_belakang: 550000,
+    kamera_depan: 175000,
+    kaca_kamera: 50000,
+    jamur_kamera: 150000,
+    speaker_bawah: 120000,
+    speaker_atas: 170000,
+    backglass: null,
+    housing: 275000,
+    flexible_charger: 170000,
+    flexible_onoff: 130000,
+    flexible_volume: 180000,
+    flexible_vibrate: 130000,
+    flexible_nfc: 100000,
+    home_button: 100000,
+    face_id: null
+  },
+  "iPhone 8": {
+    lcd: 380000,
+    baterai: 160000,
+    kamera_belakang: 380000,
+    kamera_depan: 200000,
+    kaca_kamera: 50000,
+    jamur_kamera: 170000,
+    speaker_bawah: 150000,
+    speaker_atas: 180000,
+    backglass: 100000,
+    housing: 275000,
+    flexible_charger: 200000,
+    flexible_onoff: 140000,
+    flexible_volume: 130000,
+    flexible_vibrate: 150000,
+    flexible_nfc: 150000,
+    home_button: 100000,
+    face_id: null
+  },
+  "iPhone 8 Plus": {
+    lcd: 400000,
+    baterai: 180000,
+    kamera_belakang: 680000,
+    kamera_depan: 200000,
+    kaca_kamera: 50000,
+    jamur_kamera: 170000,
+    speaker_bawah: 150000,
+    speaker_atas: 180000,
+    backglass: 150000,
+    housing: 325000,
+    flexible_charger: 220000,
+    flexible_onoff: 150000,
+    flexible_volume: 180000,
+    flexible_vibrate: 150000,
+    flexible_nfc: 150000,
+    home_button: 100000,
+    face_id: null
+  },
+  "iPhone SE (2nd Gen)": {
+    lcd: 400000,
+    baterai: 200000,
+    kamera_belakang: 400000,
+    kamera_depan: 200000,
+    kaca_kamera: 50000,
+    jamur_kamera: 170000,
+    speaker_bawah: 150000,
+    speaker_atas: 160000,
+    backglass: 150000,
+    housing: 350000,
+    flexible_charger: 140000,
+    flexible_onoff: 100000,
+    flexible_volume: 130000,
+    flexible_vibrate: 150000,
+    flexible_nfc: 150000,
+    home_button: 100000,
+    face_id: null
+  },
+  "iPhone SE (3rd Gen)": {
+    lcd: 400000,
+    baterai: 200000,
+    kamera_belakang: 400000,
+    kamera_depan: 200000,
+    kaca_kamera: 50000,
+    jamur_kamera: 170000,
+    speaker_bawah: 150000,
+    speaker_atas: 160000,
+    backglass: 150000,
+    housing: 350000,
+    flexible_charger: 140000,
+    flexible_onoff: 100000,
+    flexible_volume: 130000,
+    flexible_vibrate: 150000,
+    flexible_nfc: 150000,
+    home_button: 100000,
+    face_id: null
+  },
+  "iPhone X": {
+    lcd: 800000,
+    baterai: 240000,
+    kamera_belakang: 450000,
+    kamera_depan: 220000,
+    kaca_kamera: 50000,
+    jamur_kamera: 180000,
+    speaker_bawah: 150000,
+    speaker_atas: 200000,
+    backglass: 200000,
+    housing: 375000,
+    flexible_charger: 220000,
+    flexible_onoff: 200000,
+    flexible_volume: 180000,
+    flexible_vibrate: 180000,
+    flexible_nfc: 250000,
+    home_button: null,
+    face_id: 850000
+  },
+  "iPhone XR": {
+    lcd: 550000,
+    baterai: 250000,
+    kamera_belakang: 550000,
+    kamera_depan: 230000,
+    kaca_kamera: 50000,
+    jamur_kamera: 200000,
+    speaker_bawah: 160000,
+    speaker_atas: 220000,
+    backglass: 225000,
+    housing: 350000,
+    flexible_charger: 230000,
+    flexible_onoff: 225000,
+    flexible_volume: 180000,
+    flexible_vibrate: 200000,
+    flexible_nfc: 250000,
+    home_button: null,
+    face_id: 850000
+  },
+  "iPhone XS": {
+    lcd: 800000,
+    baterai: 260000,
+    kamera_belakang: 700000,
+    kamera_depan: 250000,
+    kaca_kamera: 50000,
+    jamur_kamera: 210000,
+    speaker_bawah: 180000,
+    speaker_atas: 250000,
+    backglass: 225000,
+    housing: 450000,
+    flexible_charger: 230000,
+    flexible_onoff: 250000,
+    flexible_volume: 230000,
+    flexible_vibrate: 200000,
+    flexible_nfc: 250000,
+    home_button: null,
+    face_id: 850000
+  },
+  "iPhone XS Max": {
+    lcd: 900000,
+    baterai: 270000,
+    kamera_belakang: 720000,
+    kamera_depan: 280000,
+    kaca_kamera: 50000,
+    jamur_kamera: 230000,
+    speaker_bawah: 180000,
+    speaker_atas: 260000,
+    backglass: 250000,
+    housing: 475000,
+    flexible_charger: 250000,
+    flexible_onoff: 260000,
+    flexible_volume: 230000,
+    flexible_vibrate: 200000,
+    flexible_nfc: 250000,
+    home_button: null,
+    face_id: 850000
+  },
+  "iPhone 11": {
+    lcd: 650000,
+    baterai: 300000,
+    kamera_belakang: 700000,
+    kamera_depan: 275000,
+    kaca_kamera: 75000,
+    jamur_kamera: 250000,
+    speaker_bawah: 190000,
+    speaker_atas: 300000,
+    backglass: 250000,
+    housing: 475000,
+    flexible_charger: 275000,
+    flexible_onoff: 265000,
+    flexible_volume: 280000,
+    flexible_vibrate: 250000,
+    flexible_nfc: 300000,
+    home_button: null,
+    face_id: 950000
+  },
+  "iPhone 11 Pro": {
+    lcd: 1000000,
+    baterai: 300000,
+    kamera_belakang: 1100000,
+    kamera_depan: 325000,
+    kaca_kamera: 75000,
+    jamur_kamera: 270000,
+    speaker_bawah: 200000,
+    speaker_atas: 350000,
+    backglass: 275000,
+    housing: 550000,
+    flexible_charger: 700000,
+    flexible_onoff: 285000,
+    flexible_volume: 300000,
+    flexible_vibrate: 250000,
+    flexible_nfc: 300000,
+    home_button: null,
+    face_id: 1000000
+  },
+  "iPhone 11 Pro Max": {
+    lcd: 1150000,
+    baterai: 330000,
+    kamera_belakang: 1250000,
+    kamera_depan: 325000,
+    kaca_kamera: 75000,
+    jamur_kamera: 270000,
+    speaker_bawah: 220000,
+    speaker_atas: 380000,
+    backglass: 300000,
+    housing: 550000,
+    flexible_charger: 750000,
+    flexible_onoff: 300000,
+    flexible_volume: 350000,
+    flexible_vibrate: 250000,
+    flexible_nfc: 350000,
+    home_button: null,
+    face_id: 1200000
+  },
+  "iPhone 12": {
+    lcd: 1250000,
+    baterai: 360000,
+    kamera_belakang: 800000,
+    kamera_depan: 320000,
+    kaca_kamera: 100000,
+    jamur_kamera: 280000,
+    speaker_bawah: 330000,
+    speaker_atas: 350000,
+    backglass: 350000,
+    housing: 550000,
+    flexible_charger: 600000,
+    flexible_onoff: 330000,
+    flexible_volume: 330000,
+    flexible_vibrate: 300000,
+    flexible_nfc: 350000,
+    home_button: null,
+    face_id: 1300000
+  },
+  "iPhone 12 Mini": {
+    lcd: 1300000,
+    baterai: 370000,
+    kamera_belakang: 850000,
+    kamera_depan: 320000,
+    kaca_kamera: 100000,
+    jamur_kamera: 280000,
+    speaker_bawah: 320000,
+    speaker_atas: 350000,
+    backglass: 300000,
+    housing: 550000,
+    flexible_charger: 500000,
+    flexible_onoff: 330000,
+    flexible_volume: 330000,
+    flexible_vibrate: 300000,
+    flexible_nfc: 350000,
+    home_button: null,
+    face_id: 1300000
+  },
+  "iPhone 12 Pro": {
+    lcd: 1400000,
+    baterai: 390000,
+    kamera_belakang: 1600000,
+    kamera_depan: 320000,
+    kaca_kamera: 120000,
+    jamur_kamera: 300000,
+    speaker_bawah: 360000,
+    speaker_atas: 380000,
+    backglass: 375000,
+    housing: 650000,
+    flexible_charger: 625000,
+    flexible_onoff: 330000,
+    flexible_volume: 330000,
+    flexible_vibrate: 300000,
+    flexible_nfc: 350000,
+    home_button: null,
+    face_id: 1300000
+  },
+  "iPhone 12 Pro Max": {
+    lcd: 1700000,
+    baterai: 420000,
+    kamera_belakang: 1800000,
+    kamera_depan: 320000,
+    kaca_kamera: 150000,
+    jamur_kamera: 300000,
+    speaker_bawah: 370000,
+    speaker_atas: 380000,
+    backglass: 400000,
+    housing: 650000,
+    flexible_charger: 625000,
+    flexible_onoff: 370000,
+    flexible_volume: 380000,
+    flexible_vibrate: 300000,
+    flexible_nfc: 380000,
+    home_button: null,
+    face_id: 1300000
+  },
+  "iPhone 13": {
+    lcd: 1950000,
+    baterai: 450000,
+    kamera_belakang: 750000,
+    kamera_depan: 400000,
+    kaca_kamera: 125000,
+    jamur_kamera: 300000,
+    speaker_bawah: 380000,
+    speaker_atas: 400000,
+    backglass: 350000,
+    housing: 600000,
+    flexible_charger: 650000,
+    flexible_onoff: 370000,
+    flexible_volume: 380000,
+    flexible_vibrate: 320000,
+    flexible_nfc: 380000,
+    home_button: null,
+    face_id: 1500000
+  },
+  "iPhone 13 Mini": {
+    lcd: 2500000,
+    baterai: 450000,
+    kamera_belakang: 750000,
+    kamera_depan: 400000,
+    kaca_kamera: 100000,
+    jamur_kamera: 300000,
+    speaker_bawah: 370000,
+    speaker_atas: 400000,
+    backglass: 325000,
+    housing: 650000,
+    flexible_charger: 650000,
+    flexible_onoff: 380000,
+    flexible_volume: 380000,
+    flexible_vibrate: 300000,
+    flexible_nfc: 350000,
+    home_button: null,
+    face_id: 1500000
+  },
+  "iPhone 13 Pro": {
+    lcd: 2700000,
+    baterai: 480000,
+    kamera_belakang: 1700000,
+    kamera_depan: 450000,
+    kaca_kamera: 150000,
+    jamur_kamera: 330000,
+    speaker_bawah: 380000,
+    speaker_atas: 420000,
+    backglass: 375000,
+    housing: 750000,
+    flexible_charger: 750000,
+    flexible_onoff: 400000,
+    flexible_volume: 380000,
+    flexible_vibrate: 320000,
+    flexible_nfc: 380000,
+    home_button: null,
+    face_id: 1700000
+  },
+  "iPhone 13 Pro Max": {
+    lcd: 2900000,
+    baterai: 550000,
+    kamera_belakang: 1900000,
+    kamera_depan: 450000,
+    kaca_kamera: 175000,
+    jamur_kamera: 330000,
+    speaker_bawah: 380000,
+    speaker_atas: 420000,
+    backglass: 400000,
+    housing: 750000,
+    flexible_charger: 850000,
+    flexible_onoff: 380000,
+    flexible_volume: 380000,
+    flexible_vibrate: 320000,
+    flexible_nfc: 380000,
+    home_button: null,
+    face_id: 1800000
+  },
+  "iPhone 14": {
+    lcd: 1700000,
+    baterai: 500000,
+    kamera_belakang: 1200000,
+    kamera_depan: 550000,
+    kaca_kamera: 200000,
+    jamur_kamera: 330000,
+    speaker_bawah: 420000,
+    speaker_atas: 450000,
+    backglass: 400000,
+    housing: 750000,
+    flexible_charger: 950000,
+    flexible_onoff: 380000,
+    flexible_volume: 380000,
+    flexible_vibrate: 350000,
+    flexible_nfc: 380000,
+    home_button: null,
+    face_id: 1900000
+  },
+  "iPhone 14 Plus": {
+    lcd: 2200000,
+    baterai: 530000,
+    kamera_belakang: 1300000,
+    kamera_depan: 650000,
+    kaca_kamera: 225000,
+    jamur_kamera: 350000,
+    speaker_bawah: 450000,
+    speaker_atas: 450000,
+    backglass: 425000,
+    housing: 780000,
+    flexible_charger: 1000000,
+    flexible_onoff: 400000,
+    flexible_volume: 380000,
+    flexible_vibrate: 350000,
+    flexible_nfc: 400000,
+    home_button: null,
+    face_id: 1900000
+  },
+  "iPhone 14 Pro": {
+    lcd: 3400000,
+    baterai: 550000,
+    kamera_belakang: 1800000,
+    kamera_depan: 700000,
+    kaca_kamera: 250000,
+    jamur_kamera: 380000,
+    speaker_bawah: 450000,
+    speaker_atas: 480000,
+    backglass: 450000,
+    housing: 900000,
+    flexible_charger: 1200000,
+    flexible_onoff: 430000,
+    flexible_volume: 380000,
+    flexible_vibrate: 380000,
+    flexible_nfc: 400000,
+    home_button: null,
+    face_id: 2200000
+  },
+  "iPhone 14 Pro Max": {
+    lcd: 3600000,
+    baterai: 570000,
+    kamera_belakang: 2000000,
+    kamera_depan: 750000,
+    kaca_kamera: 270000,
+    jamur_kamera: 400000,
+    speaker_bawah: 470000,
+    speaker_atas: 480000,
+    backglass: 500000,
+    housing: 950000,
+    flexible_charger: 1200000,
+    flexible_onoff: 430000,
+    flexible_volume: 380000,
+    flexible_vibrate: 380000,
+    flexible_nfc: 400000,
+    home_button: null,
+    face_id: 2200000
+  },
+  "iPhone 15": {
+    lcd: 3300000,
+    baterai: 600000,
+    kamera_belakang: 1300000,
+    kamera_depan: 800000,
+    kaca_kamera: 280000,
+    jamur_kamera: 500000,
+    speaker_bawah: 470000,
+    speaker_atas: 500000,
+    backglass: 450000,
+    housing: 1000000,
+    flexible_charger: 1200000,
+    flexible_onoff: 480000,
+    flexible_volume: 380000,
+    flexible_vibrate: 400000,
+    flexible_nfc: 400000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 15 Plus": {
+    lcd: 3500000,
+    baterai: 650000,
+    kamera_belakang: 1400000,
+    kamera_depan: 850000,
+    kaca_kamera: 280000,
+    jamur_kamera: 500000,
+    speaker_bawah: 470000,
+    speaker_atas: 500000,
+    backglass: 500000,
+    housing: 1200000,
+    flexible_charger: 1500000,
+    flexible_onoff: 480000,
+    flexible_volume: 500000,
+    flexible_vibrate: 400000,
+    flexible_nfc: 400000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 15 Pro": {
+    lcd: 4500000,
+    baterai: 840000,
+    kamera_belakang: 1600000,
+    kamera_depan: 900000,
+    kaca_kamera: 300000,
+    jamur_kamera: 550000,
+    speaker_bawah: 530000,
+    speaker_atas: 500000,
+    backglass: 500000,
+    housing: 1300000,
+    flexible_charger: 1300000,
+    flexible_onoff: 540000,
+    flexible_volume: 500000,
+    flexible_vibrate: 420000,
+    flexible_nfc: 450000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 15 Pro Max": {
+    lcd: 4800000,
+    baterai: 880000,
+    kamera_belakang: 1800000,
+    kamera_depan: 950000,
+    kaca_kamera: 300000,
+    jamur_kamera: 550000,
+    speaker_bawah: 530000,
+    speaker_atas: 500000,
+    backglass: 500000,
+    housing: 1500000,
+    flexible_charger: 1400000,
+    flexible_onoff: 540000,
+    flexible_volume: 500000,
+    flexible_vibrate: 420000,
+    flexible_nfc: 450000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 16": {
+    lcd: 4000000,
+    baterai: 1000000,
+    kamera_belakang: 1500000,
+    kamera_depan: 1100000,
+    kaca_kamera: 350000,
+    jamur_kamera: 550000,
+    speaker_bawah: 600000,
+    speaker_atas: 580000,
+    backglass: 550000,
+    housing: 1400000,
+    flexible_charger: 1500000,
+    flexible_onoff: 630000,
+    flexible_volume: 550000,
+    flexible_vibrate: 500000,
+    flexible_nfc: 450000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 16 Plus": {
+    lcd: 4600000,
+    baterai: 1100000,
+    kamera_belakang: 1800000,
+    kamera_depan: 1300000,
+    kaca_kamera: 350000,
+    jamur_kamera: 550000,
+    speaker_bawah: 600000,
+    speaker_atas: 580000,
+    backglass: 550000,
+    housing: 1600000,
+    flexible_charger: 1600000,
+    flexible_onoff: 630000,
+    flexible_volume: 550000,
+    flexible_vibrate: 500000,
+    flexible_nfc: 500000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 16 Pro": {
+    lcd: 5200000,
+    baterai: 1200000,
+    kamera_belakang: 1900000,
+    kamera_depan: 1700000,
+    kaca_kamera: 350000,
+    jamur_kamera: 600000,
+    speaker_bawah: 650000,
+    speaker_atas: 580000,
+    backglass: 600000,
+    housing: 1800000,
+    flexible_charger: 1700000,
+    flexible_onoff: 630000,
+    flexible_volume: 600000,
+    flexible_vibrate: 520000,
+    flexible_nfc: 500000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 16 Pro Max": {
+    lcd: 5300000,
+    baterai: 1300000,
+    kamera_belakang: 2100000,
+    kamera_depan: 1800000,
+    kaca_kamera: 350000,
+    jamur_kamera: 600000,
+    speaker_bawah: 650000,
+    speaker_atas: 580000,
+    backglass: 600000,
+    housing: 1900000,
+    flexible_charger: 1800000,
+    flexible_onoff: 630000,
+    flexible_volume: 600000,
+    flexible_vibrate: 520000,
+    flexible_nfc: 500000,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 17": {
+    lcd: null,
+    baterai: null,
+    kamera_belakang: null,
+    kamera_depan: null,
+    kaca_kamera: null,
+    jamur_kamera: null,
+    speaker_bawah: null,
+    speaker_atas: null,
+    backglass: null,
+    housing: null,
+    flexible_charger: null,
+    flexible_onoff: null,
+    flexible_volume: null,
+    flexible_vibrate: null,
+    flexible_nfc: null,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 17 Air": {
+    lcd: null,
+    baterai: null,
+    kamera_belakang: null,
+    kamera_depan: null,
+    kaca_kamera: null,
+    jamur_kamera: null,
+    speaker_bawah: null,
+    speaker_atas: null,
+    backglass: null,
+    housing: null,
+    flexible_charger: null,
+    flexible_onoff: null,
+    flexible_volume: null,
+    flexible_vibrate: null,
+    flexible_nfc: null,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 17 Plus": {
+    lcd: null,
+    baterai: null,
+    kamera_belakang: null,
+    kamera_depan: null,
+    kaca_kamera: null,
+    jamur_kamera: null,
+    speaker_bawah: null,
+    speaker_atas: null,
+    backglass: null,
+    housing: null,
+    flexible_charger: null,
+    flexible_onoff: null,
+    flexible_volume: null,
+    flexible_vibrate: null,
+    flexible_nfc: null,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 17 Pro": {
+    lcd: null,
+    baterai: null,
+    kamera_belakang: null,
+    kamera_depan: null,
+    kaca_kamera: null,
+    jamur_kamera: null,
+    speaker_bawah: null,
+    speaker_atas: null,
+    backglass: null,
+    housing: null,
+    flexible_charger: null,
+    flexible_onoff: null,
+    flexible_volume: null,
+    flexible_vibrate: null,
+    flexible_nfc: null,
+    home_button: null,
+    face_id: null
+  },
+  "iPhone 17 Pro Max": {
+    lcd: null,
+    baterai: null,
+    kamera_belakang: null,
+    kamera_depan: null,
+    kaca_kamera: null,
+    jamur_kamera: null,
+    speaker_bawah: null,
+    speaker_atas: null,
+    backglass: null,
+    housing: null,
+    flexible_charger: null,
+    flexible_onoff: null,
+    flexible_volume: null,
+    flexible_vibrate: null,
+    flexible_nfc: null,
+    home_button: null,
+    face_id: null
+  }
+};
+
+// Generate derived SPAREPART_ESTIMATES with Layar, Baterai, Body fields computed
+export const SPAREPART_ESTIMATES: Record<string, SparepartDetail> = {};
+
+Object.entries(RAW_SPAREPART_DATA).forEach(([model, info]) => {
+  SPAREPART_ESTIMATES[model] = {
+    ...info,
+    Layar: info.lcd || 0,
+    Baterai: info.baterai || 0,
+    Body: info.housing || 0,
+  } as any;
+});
+
