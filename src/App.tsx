@@ -16,7 +16,6 @@ import {
 // Firebase integrations
 import { 
   auth, 
-  signInWithPopup, 
   signOut as firebaseSignOut, 
   googleProvider,
   getFirebaseTransactions,
@@ -25,35 +24,20 @@ import {
   getFirebaseSettings,
   saveFirebaseSettings
 } from "./firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onAuthStateChanged, User, signInWithRedirect, getRedirectResult } from "firebase/auth";
 
 // Lucide icon
 import { Chrome, ShieldAlert, Monitor, Keyboard, HelpCircle, X } from "lucide-react";
 
 export default function App() {
-  // Navigation active tab
   const [activeTab, setActiveTab] = useState("checker");
-
-  // Mobile sidebar menu drawer state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Global search input query string
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Ledger state containing all transaction records
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-  // Default price multipliers override state
   const [partsConfig, setPartsConfig] = useState<QCPart[]>([]);
-
-  // Auth States
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-
-  // Keyboard shortcut modal visibility
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
-
-  // QRIS Donation banner overlays
   const [showQrisDonationModal, setShowQrisDonationModal] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
@@ -76,13 +60,11 @@ export default function App() {
     setShowQrisDonationModal(false);
   };
 
-  // Theme states
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("auraphone_dark_mode");
-    return saved !== "false"; // default to true
+    return saved !== "false";
   });
 
-  // Dynamic theme syncing
   useEffect(() => {
     if (darkMode) {
       document.body.classList.remove("light");
@@ -92,27 +74,30 @@ export default function App() {
     localStorage.setItem("auraphone_dark_mode", String(darkMode));
   }, [darkMode]);
 
+  // Handle redirect result on page load
+  useEffect(() => {
+    getRedirectResult(auth).catch((err) => {
+      console.error("Redirect result error:", err);
+    });
+  }, []);
+
   // Auth session listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Fetch remote user-isolated Firestore logs
         const fetched = await getFirebaseTransactions(currentUser.uid);
         if (fetched.length > 0) {
           setTransactions(fetched);
           localStorage.setItem(STORAGE_KEY_TRANSACTIONS + "_" + currentUser.uid, JSON.stringify(fetched));
         } else {
-          // Fallback initialization with default sample transactions if first-time sign-in
           setTransactions(SAMPLE_TRANSACTIONS);
         }
 
-        // Fetch remote user custom settings if any
         const remoteSettings = await getFirebaseSettings(currentUser.uid);
         if (remoteSettings) {
           localStorage.setItem("iphone_elite_shop_settings", JSON.stringify(remoteSettings));
         } else {
-          // Initialize default shop settings for auraphone.id and owner
           const defaultSettings = {
             shopName: "auraphone.id",
             ownerName: "Rd. Mulky Ibrahim",
@@ -131,10 +116,9 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Global Keyboard Shortcuts Event Handler
+  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Bypass if typing in text elements
       if (
         document.activeElement?.tagName === "INPUT" ||
         document.activeElement?.tagName === "TEXTAREA" ||
@@ -152,7 +136,6 @@ export default function App() {
         setActiveTab("history");
       } else if (key === "e") {
         e.preventDefault();
-        // Dispatch local event for compiler and UI to resolve active document PDF generator on current page
         window.dispatchEvent(new CustomEvent("trigger-active-pdf"));
       } else if (key === "?") {
         e.preventDefault();
@@ -164,7 +147,6 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Initial local loading configs
   useEffect(() => {
     const storedPartsStr = localStorage.getItem(STORAGE_KEY_PARTS);
     if (storedPartsStr) {
@@ -179,11 +161,11 @@ export default function App() {
     }
   }, []);
 
-  // Sync Google Sign In trigger popup
+  // Google Sign In via Redirect (lebih reliable di Vercel)
   const handleGoogleSignIn = async () => {
     try {
       setAuthLoading(true);
-      await signInWithPopup(auth, googleProvider);
+      await signInWithRedirect(auth, googleProvider);
     } catch (e) {
       console.error("Sign-in operation failed:", e);
       setAuthLoading(false);
@@ -198,9 +180,7 @@ export default function App() {
     }
   };
 
-  // Save transaction handler callback
   const handleSaveTransaction = async (newTransaction: Transaction) => {
-    // 1. Sync local memory
     setTransactions(prev => {
       const updated = [newTransaction, ...prev];
       if (user) {
@@ -209,7 +189,6 @@ export default function App() {
       return updated;
     });
 
-    // 2. Transmit block to remote Firestore isolated transactions list
     if (user) {
       try {
         await saveFirebaseTransaction(user.uid, newTransaction);
@@ -219,7 +198,6 @@ export default function App() {
     }
   };
 
-  // Update transaction handler callback (e.g. for change status option)
   const handleUpdateTransaction = async (updatedTx: Transaction) => {
     setTransactions(prev => {
       const updated = prev.map(t => t.id === updatedTx.id ? updatedTx : t);
@@ -238,7 +216,6 @@ export default function App() {
     }
   };
 
-  // Delete transaction handler callback
   const handleDeleteTransaction = async (id: string) => {
     setTransactions(prev => {
       const filtered = prev.filter(t => t.id !== id);
@@ -257,7 +234,6 @@ export default function App() {
     }
   };
 
-  // Restore dynamic database logic
   const handleRestoreTransactions = async (imported: Transaction[]) => {
     setTransactions(imported);
     if (user) {
@@ -268,7 +244,6 @@ export default function App() {
     }
   };
 
-  // Reset database ledger entirely
   const handleResetLedger = async () => {
     setTransactions(SAMPLE_TRANSACTIONS);
     if (user) {
@@ -304,35 +279,26 @@ export default function App() {
     window.dispatchEvent(new Event("storage"));
   };
 
-  // Save price matrix overrides callback
   const handleSavePartsConfig = (updated: QCPart[]) => {
     setPartsConfig(updated);
     localStorage.setItem(STORAGE_KEY_PARTS, JSON.stringify(updated));
   };
 
-  // Factory overrides callback
   const handleResetFactoryPartsConfig = () => {
     setPartsConfig(DEFAULT_PARTS);
     localStorage.setItem(STORAGE_KEY_PARTS, JSON.stringify(DEFAULT_PARTS));
   };
 
-  // Map Tab Names cleanly for the Header View title
   const getHeaderTitle = () => {
     switch (activeTab) {
-      case "checker":
-        return "Form QC iPhone";
-      case "history":
-        return "Riwayat Penjualan";
-      case "statistics":
-        return "Statistik";
-      case "settings":
-        return "Pengaturan";
-      default:
-        return "Konsol QC";
+      case "checker": return "Form QC iPhone";
+      case "history": return "Riwayat Penjualan";
+      case "statistics": return "Statistik";
+      case "settings": return "Pengaturan";
+      default: return "Konsol QC";
     }
   };
 
-  // Session loader spinner view
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center font-sans">
@@ -344,11 +310,9 @@ export default function App() {
     );
   }
 
-  // 1. Beautiful Minimalist Google Login Landing Page
   if (!user) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 relative font-sans select-none overflow-hidden">
-        {/* Ambient backlighting visual cues */}
         <div className="absolute w-[500px] h-[500px] rounded-full bg-white/[0.012] blur-[140px] -top-1/4 -left-1/4 pointer-events-none" />
         <div className="absolute w-[600px] h-[600px] rounded-full bg-white/[0.008] blur-[160px] -bottom-1/3 -right-1/3 pointer-events-none" />
 
@@ -397,10 +361,8 @@ export default function App() {
     );
   }
 
-  // 2. Fully Authenticated Workspace Layout
   return (
     <div className="min-h-screen flex bg-dark-base relative overflow-x-clip">
-      {/* Mobile backdrop blur overlay is z-45 */}
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)}
@@ -408,7 +370,6 @@ export default function App() {
         />
       )}
 
-      {/* Embedded Left Floating Core Navigation Rail */}
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -418,10 +379,7 @@ export default function App() {
         onLogout={handleAppLogout}
       />
 
-      {/* Main dashboard content wrapper with desktop adaptive margin */}
       <div className="flex-1 lg:ml-[260px] ml-0 min-h-screen flex flex-col transition-all duration-300">
-        
-        {/* Header Top Navigation Menu */}
         <Topbar 
           title={getHeaderTitle()} 
           searchQuery={searchQuery} 
@@ -438,7 +396,6 @@ export default function App() {
           }}
         />
 
-        {/* Dynamic Panel Injection */}
         <main className="mt-20 p-4 sm:p-8 flex-1 max-w-[1600px] w-full mx-auto overflow-x-visible">
           {activeTab === "checker" && (
             <QCCheckerForm 
@@ -446,7 +403,6 @@ export default function App() {
               partsConfig={partsConfig}
             />
           )}
-
           {activeTab === "history" && (
             <SalesHistoryLedger 
               transactions={transactions}
@@ -457,11 +413,9 @@ export default function App() {
               searchQuery={searchQuery}
             />
           )}
-
           {activeTab === "statistics" && (
             <StatisticsOverview transactions={transactions} />
           )}
-
           {activeTab === "settings" && (
             <SettingsConfig 
               user={user}
@@ -474,7 +428,6 @@ export default function App() {
         </main>
       </div>
 
-      {/* Floating Keyboard Shortcuts Trigger Button */}
       <button
         onClick={() => setShowShortcutsModal(true)}
         className="no-print fixed bottom-6 right-6 h-10 w-10 bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all cursor-pointer z-50 rounded-none"
@@ -483,47 +436,37 @@ export default function App() {
         <Keyboard className="w-4 h-4" />
       </button>
 
-      {/* Keyboard Shortcuts Modal Dialog */}
       {showShortcutsModal && (
         <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-[250] p-4 no-print font-sans select-none animate-fade-in">
           <div className="premium-card w-full max-w-sm border-white/20 p-6 flex flex-col relative">
             <button
               onClick={() => setShowShortcutsModal(false)}
               className="absolute top-4 right-4 text-white/40 hover:text-white border border-white/15 p-1 cursor-pointer hover:bg-white/5 rounded-none"
-              title="Close modal"
             >
               <X className="w-3.5 h-3.5" />
             </button>
-
             <h3 className="font-display text-xs font-bold text-white uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-white/50" />
               Keyboard Shortcuts
             </h3>
-
             <div className="space-y-4">
               <p className="text-[10px] uppercase tracking-wider text-white/40 mb-2">
                 Tekan tombol berikut di luar form input untuk jalan pintas:
               </p>
               <div className="divide-y divide-white/10">
-                <div className="flex justify-between py-2.5 text-xs text-white">
-                  <span className="font-bold tracking-wide uppercase">Mulai QC Baru</span>
-                  <kbd className="px-2 py-0.5 bg-white/10 font-mono font-bold text-[10px] uppercase rounded-none tracking-widest border border-white/10">N</kbd>
-                </div>
-                <div className="flex justify-between py-2.5 text-xs text-white">
-                  <span className="font-bold tracking-wide uppercase">Buka Riwayat</span>
-                  <kbd className="px-2 py-0.5 bg-white/10 font-mono font-bold text-[10px] uppercase rounded-none tracking-widest border border-white/10">H</kbd>
-                </div>
-                <div className="flex justify-between py-2.5 text-xs text-white">
-                  <span className="font-bold tracking-wide uppercase">Export PDF Aktif</span>
-                  <kbd className="px-2 py-0.5 bg-white/10 font-mono font-bold text-[10px] uppercase rounded-none tracking-widest border border-white/10">E</kbd>
-                </div>
-                <div className="flex justify-between py-2.5 text-xs text-white">
-                  <span className="font-bold tracking-wide uppercase">Daftar Shortcut</span>
-                  <kbd className="px-2 py-0.5 bg-white/10 font-mono font-bold text-[10px] uppercase rounded-none tracking-widest border border-white/10">?</kbd>
-                </div>
+                {[
+                  { label: "Mulai QC Baru", key: "N" },
+                  { label: "Buka Riwayat", key: "H" },
+                  { label: "Export PDF Aktif", key: "E" },
+                  { label: "Daftar Shortcut", key: "?" },
+                ].map(({ label, key }) => (
+                  <div key={key} className="flex justify-between py-2.5 text-xs text-white">
+                    <span className="font-bold tracking-wide uppercase">{label}</span>
+                    <kbd className="px-2 py-0.5 bg-white/10 font-mono font-bold text-[10px] uppercase rounded-none tracking-widest border border-white/10">{key}</kbd>
+                  </div>
+                ))}
               </div>
             </div>
-
             <button
               onClick={() => setShowShortcutsModal(false)}
               className="w-full bg-white text-black font-extrabold text-[10px] tracking-widest uppercase mt-6 py-2 rounded-none cursor-pointer text-center"
@@ -534,20 +477,15 @@ export default function App() {
         </div>
       )}
 
-      {/* QRIS Donation Pop-up */}
       {showQrisDonationModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[300] p-4 no-print select-none animate-fade-in font-sans">
           <div className="premium-card w-full max-w-sm border-white/20 p-6 flex flex-col items-center relative text-center">
-            
             <h3 className="font-display text-xs font-bold text-white uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
               SUPPORT THE DEVELOPER
             </h3>
-
             <p className="text-[10px] text-white/60 tracking-normal leading-relaxed uppercase max-w-xs mb-5 font-sans">
               Aplikasi ini sepenuhnya gratis dan dikembangkan mandiri oleh <span className="text-white font-bold">Rd. Mulky Ibrahim</span>. Jika terbantu, Anda bisa dukung kelangsungan server & update data dengan donasi sukarela.
             </p>
-
-            {/* QRIS image layout centering */}
             <div className="w-[180px] h-[180px] bg-white p-1.5 flex items-center justify-center mb-5 border border-white/10 select-none">
               <img 
                 src="/assets/qris.png" 
@@ -556,11 +494,9 @@ export default function App() {
                 referrerPolicy="no-referrer"
               />
             </div>
-
             <p className="text-[9px] text-emerald-400 font-mono tracking-wider uppercase mb-5 animate-pulse">
               Scan QRIS di atas untuk donasi • Bebas Nominal
             </p>
-
             <div className="w-full flex flex-col gap-3">
               <label className="flex items-center justify-center gap-2 text-[10px] text-white/40 uppercase cursor-pointer hover:text-white/60 transition-all font-sans">
                 <input 
@@ -571,7 +507,6 @@ export default function App() {
                 />
                 <span>Jangan Tampilkan Lagi</span>
               </label>
-
               <button
                 onClick={handleCloseQris}
                 className="w-full bg-white text-black font-extrabold text-[10px] tracking-widest uppercase py-3.5 rounded-none cursor-pointer text-center hover:bg-neutral-200 transition-all"
@@ -585,4 +520,3 @@ export default function App() {
     </div>
   );
 }
-
