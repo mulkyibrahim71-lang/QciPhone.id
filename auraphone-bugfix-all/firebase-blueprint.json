@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Record for each iPhone QC check session and customer transaction",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "customerName": {
+          "type": "string"
+        },
+        "customerWa": {
+          "type": "string"
+        },
+        "deviceModel": {
+          "type": "string"
+        },
+        "deviceStorage": {
+          "type": "string"
+        },
+        "deviceColor": {
+          "type": "string"
+        },
+        "buyPrice": {
+          "type": "number"
+        },
+        "sellPrice": {
+          "type": "number"
+        },
+        "totalRepairCost": {
+          "type": "number"
+        },
+        "netProfit": {
+          "type": "number"
+        },
+        "eligibility": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "partsState": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "customerName",
+        "deviceModel",
+        "buyPrice",
+        "sellPrice"
+      ]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "Store branding and configuration preferences",
+      "type": "object",
+      "properties": {
+        "shopName": {
+          "type": "string"
+        },
+        "whatsapp": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "darkMode": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Authorized user transactions containing client portfolio and QC checkpoint evaluations"
+    },
+    "/users/{userId}/settings/shop": {
+      "schema": "UserSettings",
+      "description": "Branding and profile settings for the individual shop owner"
+    }
+  }
+}
