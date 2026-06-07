@@ -1,10 +1,8 @@
 {
-  "projectId": "august-text-5nzsc",
-  "appId": "1:287516330438:web:845cbcdcc5094305818ac7",
   "apiKey": "AIzaSyDTJg1eO72jKh4jyA9sOCmLisvy5mLDmlY",
   "authDomain": "august-text-5nzsc.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-0cb395fe-1507-4531-b516-edabf019f5ef",
+  "projectId": "august-text-5nzsc",
   "storageBucket": "august-text-5nzsc.firebasestorage.app",
   "messagingSenderId": "287516330438",
-  "measurementId": ""
+  "appId": "1:287516330438:web:845cbcdcc5094305818ac7"
 }
